@@ -1,0 +1,155 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Magento
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magentocommerce.com so we can send you a copy immediately.
+ *
+ * @category	CosmoCommerce
+ * @package 	CosmoCommerce_99Bill
+ * @copyright	Copyright (c) 2009 CosmoCommerce,LLC. (http://www.cosmocommerce.com)
+ * @contact :
+ * T: +86-021-66346672
+ * L: Shanghai,China
+ * M:sales@cosmocommerce.com
+ */
+-->
+<config>
+    <modules>
+        <CosmoCommerce_Cosmo99Bill>
+            <version>0.9.0</version>
+        </CosmoCommerce_Cosmo99Bill>
+    </modules>
+    <global>
+		  <helpers>
+		  	   <cosmo99bill>
+		  	   	   <class>CosmoCommerce_Cosmo99Bill_Helper</class>
+		  	   </cosmo99bill>
+		  </helpers>	
+        <models>
+            <cosmo99bill>
+                <class>CosmoCommerce_Cosmo99Bill_Model</class>
+                <resourceModel>cosmo99bill_mysql4</resourceModel>
+            </cosmo99bill>
+            <cosmo99bill_mysql4>
+                <class>CosmoCommerce_Cosmo99Bill_Model_Mysql4</class>
+                <entities>
+                    <api_debug><table>cosmo99bill_api_debug</table></api_debug>
+                </entities>
+            </cosmo99bill_mysql4>
+        </models>
+        <resources>
+            <cosmo99bill_setup>
+                <setup>
+                    <module>CosmoCommerce_Cosmo99Bill</module>
+                    <class>CosmoCommerce_Cosmo99Bill_Model_Mysql4_Setup</class>
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </cosmo99bill_setup>
+            <cosmo99bill_write>
+                <connection>
+                    <use>core_write</use>
+                </connection>
+            </cosmo99bill_write>
+            <cosmo99bill_read>
+                <connection>
+                    <use>core_read</use>
+                </connection>
+            </cosmo99bill_read>
+        </resources>
+        <blocks>
+            <cosmo99bill><class>CosmoCommerce_Cosmo99Bill_Block</class></cosmo99bill>
+    	</blocks>
+        <payment>
+            <cosmo99bill_payment>
+                <languages>
+                    <FR>
+                        <code>FR</code>
+                        <name>Français</name>
+                    </FR>
+                    <EN>
+                        <code>EN</code>
+                        <name>Anglais</name>
+                    </EN>
+                    <ES>
+                        <code>ES</code>
+                        <name>Espagnol</name>
+                    </ES>
+                    <DE>
+                        <code>DE</code>
+                        <name>Allemand</name>
+                    </DE>
+                    <IT>
+                        <code>IT</code>
+                        <name>Italien</name>
+                    </IT>
+                    <NL>
+                        <code>NL</code>
+                        <name>Néerlandais</name>
+                    </NL>
+                </languages>
+            </cosmo99bill_payment>
+        </payment>
+    </global>
+    <frontend>
+        <secure_url>
+            <cosmo99bill_payment>/cosmo99bill/payment</cosmo99bill_payment>
+        </secure_url>
+        <routers>
+            <cosmo99bill>
+                <use>standard</use>
+                <args>
+                    <module>CosmoCommerce_Cosmo99Bill</module>
+                    <frontName>cosmo99bill</frontName>
+                </args>
+            </cosmo99bill>
+        </routers>
+        <translate>
+            <modules>
+                <CosmoCommerce_Cosmo99Bill>
+                    <files>
+                        <default>CosmoCommerce_Cosmo99Bill.csv</default>
+                    </files>
+                </CosmoCommerce_Cosmo99Bill>
+            </modules>
+        </translate>
+        <layout>
+            <updates>
+                <cosmo99bill>
+                    <file>cosmo99bill.xml</file>
+                </cosmo99bill>
+            </updates>
+        </layout>
+    </frontend>
+    <adminhtml>
+        <translate>
+            <modules>
+                <CosmoCommerce_Cosmo99Bill>
+                    <files>
+                        <default>CosmoCommerce_Cosmo99Bill.csv</default>
+                    </files>
+                </CosmoCommerce_Cosmo99Bill>
+            </modules>
+        </translate>
+    </adminhtml>
+    <default>
+        <payment>
+            <cosmo99bill_payment>
+                  <model>cosmo99bill/payment</model>
+                  <title>Cosmo99Bill</title>
+                  <allowspecific>0</allowspecific>
+                  <transaction_type>O</transaction_type>
+            </cosmo99bill_payment>
+        </payment>
+    </default>
+</config>
