@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Magento
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magentocommerce.com so we can send you a copy immediately.
+ *
+ * @category	CosmoCommerce
+ * @package 	CosmoCommerce_Yeepay
+ * @copyright	Copyright (c) 2009 CosmoCommerce,LLC. (http://www.cosmocommerce.com)
+ * @contact :
+ * T: +86-021-66346672
+ * L: Shanghai,China
+ * M:sales@cosmocommerce.com
+ */
+-->
+<config>
+    <modules>
+        <CosmoCommerce_Yeepay>
+            <version>0.9.0</version>
+        </CosmoCommerce_Yeepay>
+    </modules>
+    <global>
+        <models>
+            <yeepay>
+                <class>CosmoCommerce_Yeepay_Model</class>
+                <resourceModel>yeepay_mysql4</resourceModel>
+            </yeepay>
+            <yeepay_mysql4>
+                <class>CosmoCommerce_Yeepay_Model_Mysql4</class>
+                <entities>
+                    <api_debug><table>yeepay_api_debug</table></api_debug>
+                </entities>
+            </yeepay_mysql4>
+        </models>
+        <resources>
+            <yeepay_setup>
+                <setup>
+                    <module>CosmoCommerce_Yeepay</module>
+                    <class>CosmoCommerce_Yeepay_Model_Mysql4_Setup</class>
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </yeepay_setup>
+            <yeepay_write>
+                <connection>
+                    <use>core_write</use>
+                </connection>
+            </yeepay_write>
+            <yeepay_read>
+                <connection>
+                    <use>core_read</use>
+                </connection>
+            </yeepay_read>
+        </resources>
+        <blocks>
+            <yeepay><class>CosmoCommerce_Yeepay_Block</class></yeepay>
+    	</blocks>
+		  <helpers>
+		  	   <yeepay>
+		  	   	   <class>CosmoCommerce_Yeepay_Helper</class>
+		  	   </yeepay>
+		  </helpers>		
+    </global>
+    <frontend>
+        <secure_url>
+            <yeepay_payment>/yeepay/payment</yeepay_payment>
+        </secure_url>
+        <routers>
+            <yeepay>
+                <use>standard</use>
+                <args>
+                    <module>CosmoCommerce_Yeepay</module>
+                    <frontName>yeepay</frontName>
+                </args>
+            </yeepay>
+        </routers>
+        <translate>
+            <modules>
+                <CosmoCommerce_Yeepay>
+                    <files>
+                        <default>CosmoCommerce_Yeepay.csv</default>
+                    </files>
+                </CosmoCommerce_Yeepay>
+            </modules>
+        </translate>
+        <layout>
+            <updates>
+                <yeepay>
+                    <file>yeepay.xml</file>
+                </yeepay>
+            </updates>
+        </layout>
+    </frontend>
+    <adminhtml>
+        <translate>
+            <modules>
+                <CosmoCommerce_Yeepay>
+                    <files>
+                        <default>CosmoCommerce_Yeepay.csv</default>
+                    </files>
+                </CosmoCommerce_Yeepay>
+            </modules>
+        </translate>
+    </adminhtml>
+    <default>
+        <payment>
+            <yeepay_payment>
+                  <model>yeepay/payment</model>
+                  <title>Yeepay</title>
+                  <allowspecific>0</allowspecific>
+                  <transaction_type>O</transaction_type>
+            </yeepay_payment>
+        </payment>
+    </default>
+</config>
