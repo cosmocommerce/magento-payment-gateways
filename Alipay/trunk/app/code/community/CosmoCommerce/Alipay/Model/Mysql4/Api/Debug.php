@@ -14,13 +14,12 @@
  *
  * @category	CosmoCommerce
  * @package 	CosmoCommerce_Alipay
- * @copyright	Copyright (c) 2009 CosmoCommerce,LLC. (http://www.cosmocommerce.com)
+ * @copyright	Copyright (c) 2009-2013 CosmoCommerce,LLC. (http://www.cosmocommerce.com)
  * @contact :
  * T: +86-021-66346672
  * L: Shanghai,China
  * M:sales@cosmocommerce.com
  */
-
 class CosmoCommerce_Alipay_Model_Mysql4_Api_Debug extends Mage_Core_Model_Mysql4_Abstract
 {
     protected function _construct()

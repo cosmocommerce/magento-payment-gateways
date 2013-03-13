@@ -12,15 +12,14 @@
  * obtain it through the world-wide-web, please send an email
  * to license@magentocommerce.com so we can send you a copy immediately.
  *
- * @category	CosmoCommerce
- * @package 	CosmoCommerce_Alipay
- * @copyright	Copyright (c) 2009 CosmoCommerce,LLC. (http://www.cosmocommerce.com)
+ * @category    CosmoCommerce
+ * @package     CosmoCommerce_Alipay
+ * @copyright   Copyright (c) 2009-2013 CosmoCommerce,LLC. (http://www.cosmocommerce.com)
  * @contact :
  * T: +86-021-66346672
  * L: Shanghai,China
  * M:sales@cosmocommerce.com
  */
- 
 class CosmoCommerce_Alipay_Model_Payment extends Mage_Payment_Model_Method_Abstract
 {
     protected $_code  = 'alipay_payment';
@@ -147,7 +146,29 @@ class CosmoCommerce_Alipay_Model_Payment extends Mage_Payment_Model_Method_Abstr
         if (!($order instanceof Mage_Sales_Model_Order)) {
             Mage::throwException($this->_getHelper()->__('Cannot retrieve order object'));
         }
-
+		
+		
+		$converted_final_price=$order->getGrandTotal();
+		$fromCur = Mage::app()->getStore()->getCurrentCurrencyCode();
+		$toCur = 'CNY';
+		
+		
+		
+		if(Mage::app()->getStore()->getCurrentCurrencyCode() !=$toCur){
+			if(Mage::app()->getStore()->getBaseCurrencyCode()!=$toCur){
+			
+				$rate=Mage::getModel('directory/currency')->load($toCur)->getAnyRate($fromCur);
+				$converted_final_price= $order->getGrandTotal()/$rate;
+				
+			
+			}else{
+				$rate=Mage::getModel('directory/currency')->load($toCur)->getAnyRate($fromCur);
+				$converted_final_price= $order->getGrandTotal()/$rate;
+			
+			}
+		}else{
+			//$converted_final_price=$order->getGrandTotal();
+		}
 		$parameter = array('service'           => $this->getConfigData('service_type'),
                            'partner'           => $this->getConfigData('partner_id'),
                            'return_url'        => $this->getReturnURL(),
@@ -159,7 +180,7 @@ class CosmoCommerce_Alipay_Model_Payment extends Mage_Payment_Model_Method_Abstr
                            'logistics_fee'     => '0.00', //because magento has shipping system, it has included shipping price
                            'logistics_payment' => 'BUYER_PAY',  //always
                            'logistics_type'    => 'EXPRESS', //Only three shipping method:POST,EMS,EXPRESS
-                           'price'             => sprintf('%.2f', $order->getBaseGrandTotal()) ,
+                           'price'             => sprintf('%.2f', $converted_final_price) ,
                            'payment_type'      => '1',
                            'quantity'          => '1', // For the moment, the parameter of price is total price, so the quantity is 1.
                            'show_url'          => Mage::getUrl(),

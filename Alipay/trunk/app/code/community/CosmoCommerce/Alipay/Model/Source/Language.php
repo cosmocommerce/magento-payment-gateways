@@ -12,9 +12,9 @@
  * obtain it through the world-wide-web, please send an email
  * to license@magentocommerce.com so we can send you a copy immediately.
  *
- * @category	CosmoCommerce
- * @package 	CosmoCommerce_Alipay
- * @copyright	Copyright (c) 2009 CosmoCommerce,LLC. (http://www.cosmocommerce.com)
+ * @category    CosmoCommerce
+ * @package     CosmoCommerce_Alipay
+ * @copyright   Copyright (c) 2009-2013 CosmoCommerce,LLC. (http://www.cosmocommerce.com)
  * @contact :
  * T: +86-021-66346672
  * L: Shanghai,China

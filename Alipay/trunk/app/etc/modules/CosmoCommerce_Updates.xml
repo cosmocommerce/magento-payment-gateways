@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <CosmoCommerce_Updates>
+            <active>true</active>
+            <codePool>community</codePool>
+        </CosmoCommerce_Updates>
+    </modules>
+</config> 

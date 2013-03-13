@@ -12,9 +12,9 @@
  * obtain it through the world-wide-web, please send an email
  * to license@magentocommerce.com so we can send you a copy immediately.
  *
- * @category	CosmoCommerce
- * @package 	CosmoCommerce_Alipay
- * @copyright	Copyright (c) 2009 CosmoCommerce,LLC. (http://www.cosmocommerce.com)
+ * @category    CosmoCommerce
+ * @package     CosmoCommerce_Alipay
+ * @copyright   Copyright (c) 2009-2013 CosmoCommerce,LLC. (http://www.cosmocommerce.com)
  * @contact :
  * T: +86-021-66346672
  * L: Shanghai,China
@@ -78,7 +78,6 @@ class CosmoCommerce_Alipay_PaymentController extends Mage_Core_Controller_Front_
 
     public function notifyAction()
     {
-
         if ($this->getRequest()->isPost())
         {
             $postData = $this->getRequest()->getPost();
@@ -94,32 +93,161 @@ class CosmoCommerce_Alipay_PaymentController extends Mage_Core_Controller_Front_
         {
             return;
         }
+		$alipay = Mage::getModel('alipay/payment');
+		
+		$partner=$alipay->getConfigData('partner_id');
+		$security_code=$alipay->getConfigData('security_code');
+		$sign_type='MD5';
+		$mysign="";
+		$_input_charset='utf-8';
+		$transport=$alipay->getConfigData('transport');
+		
+		if($transport == "https") {
+			$gateway = "https://www.alipay.com/cooperate/gateway.do?";
+		} else {
+			$gateway = "http://notify.alipay.com/trade/notify_query.do?";
+		}
 
+		if($transport == "https") {
+			$veryfy_url = $gateway. "service=notify_verify" ."&partner=" .$partner. "&notify_id=".$postData["notify_id"];
+		} else {
+			$veryfy_url = $gateway. "partner=".$partner."&notify_id=".$postData["notify_id"];
+		}	
 
-        if ($postData['trade_status'] == "TRADE_FINISHED")
-        {
-            $order = Mage::getModel('sales/order');
-            $order->loadByIncrementId($postData['out_trade_no']);
-            //$order->setAlipayTradeno($postData['trade_no']);
-            $order->setStatus(Mage_Sales_Model_Order::STATE_PROCESSING);
-            // $order->sendNewOrderEmail();
-            $order->addStatusToHistory(
-            $order->getStatus(),
-            Mage::helper('alipay')->__('买家已付款， 等待卖家发货。'));
-            try
-            {
-                $order->save();
-            } catch(Exception $e)
-            {
-                ;
-            }
+		$veryfy_result="";
+		$veryfy_result  = $this->get_verify($veryfy_url);
+		
+		$post           = $this->para_filter($postData);
+		
+		
+		$sort_post      = $this->arg_sort($post);
+		
+		$arg="";
+		while (list ($key, $val) = each ($sort_post)) {
+		
+			$arg.=$key."=".$val."&";
+		}
+		$prestr="";
+		$prestr = substr($arg,0,count($arg)-2);  //去掉最后一个&号
+		$mysign = $this->sign($prestr.$security_code);
+		
+		
+		Mage::log(strpos($veryfy_result,"true"));
+		
+		if ( $mysign == $postData["sign"])  {
+			
+			
+			if($postData['trade_status'] == 'WAIT_BUYER_PAY') {                   //等待买家付款
+				
+				$order = Mage::getModel('sales/order');
+				$order->loadByIncrementId($postData['out_trade_no']);
+				//$order->setAlipayTradeno($postData['trade_no']);
+				// $order->sendNewOrderEmail();
+				$order->addStatusToHistory(
+				$order->getStatus(),
+				Mage::helper('alipay')->__('等待买家付款。'));
+				try{
+					$order->save();
+					echo "success";
+				} catch(Exception $e){
+					
+				}
+			}
+			else if($postData['trade_status'] == 'WAIT_SELLER_SEND_GOODS') {      //买家付款成功,等待卖家发货
+				
+				$order = Mage::getModel('sales/order');
+				$order->loadByIncrementId($postData['out_trade_no']);
+				//$order->setAlipayTradeno($postData['trade_no']);
+				// $order->sendNewOrderEmail();
+				$order->addStatusToHistory(
+				$alipay->getConfigData('order_status_payment_accepted'),
+				Mage::helper('alipay')->__('买家付款成功,等待卖家发货。'));
+				try{
+					$order->save();
+					echo "success";
+				} catch(Exception $e){
+					
+				}
+			}
+			else if($postData['trade_status'] == 'WAIT_BUYER_CONFIRM_GOODS') {    //卖家已经发货等待买家确认
+			
+				$order = Mage::getModel('sales/order');
+				$order->loadByIncrementId($postData['out_trade_no']);
+				//$order->setAlipayTradeno($postData['trade_no']);
+				// $order->sendNewOrderEmail();
+				$order->addStatusToHistory(
+				$alipay->getConfigData('order_status_payment_accepted'),
+				Mage::helper('alipay')->__('卖家已经发货等待买家确认。'));
+				try{
+					$order->save();
+					echo "success";
+				} catch(Exception $e){
+				}
 
+			}
+			else if($postData['trade_status'] == 'TRADE_FINISHED') {   
+				$order = Mage::getModel('sales/order');
+				$order->loadByIncrementId($postData['out_trade_no']);
+				//$order->setAlipayTradeno($postData['trade_no']);
+				$order->setStatus(Mage_Sales_Model_Order::STATE_PROCESSING);
+				// $order->sendNewOrderEmail();
+				$order->addStatusToHistory(
+				$alipay->getConfigData('order_status_payment_accepted'),
+				Mage::helper('alipay')->__('买家已付款,交易成功结束。'));
+				try{
+					$order->save();
+					echo "success";
+				} catch(Exception $e){
+					
+				}
 
-        }
+			}
+			else {
+				echo "fail";
+				Mage::log("x");
+			}	
 
-        return;
+		} else {
+			echo "fail";
+		}
     }
 
+	public function get_verify($url,$time_out = "60") {
+		$urlarr     = parse_url($url);
+		$errno      = "";
+		$errstr     = "";
+		$transports = "";
+		if($urlarr["scheme"] == "https") {
+			$transports = "ssl://";
+			$urlarr["port"] = "443";
+		} else {
+			$transports = "tcp://";
+			$urlarr["port"] = "80";
+		}
+		$fp=@fsockopen($transports . $urlarr['host'],$urlarr['port'],$errno,$errstr,$time_out);
+		if(!$fp) {
+			die("ERROR: $errno - $errstr<br />\n");
+		} else {
+			fputs($fp, "POST ".$urlarr["path"]." HTTP/1.1\r\n");
+			fputs($fp, "Host: ".$urlarr["host"]."\r\n");
+			fputs($fp, "Content-type: application/x-www-form-urlencoded\r\n");
+			fputs($fp, "Content-length: ".strlen($urlarr["query"])."\r\n");
+			fputs($fp, "Connection: close\r\n\r\n");
+			fputs($fp, $urlarr["query"] . "\r\n\r\n");
+			while(!feof($fp)) {
+				$info[]=@fgets($fp, 1024);
+			}
+			fclose($fp);
+			$info = implode(",",$info);
+			$arg="";
+			while (list ($key, $val) = each ($_POST)) {
+				$arg.=$key."=".$val."&";
+			}
+
+		return $info;
+		}
+
+	}
     /**
      *  Alipay response router
      *
@@ -272,4 +400,41 @@ class CosmoCommerce_Alipay_PaymentController extends Mage_Core_Controller_Front_
         $this->renderLayout();
         Mage::getSingleton('checkout/session')->unsLastRealOrderId();
     }
+	
+	
+    
+	public function sign($prestr) {
+		$mysign = md5($prestr);
+		return $mysign;
+	}
+    
+	public function para_filter($parameter) {
+		$para = array();
+		while (list ($key, $val) = each ($parameter)) {
+			if($key == "sign" || $key == "sign_type" || $val == "")continue;
+			else	$para[$key] = $parameter[$key];
+
+		}
+		return $para;
+	}
+	
+	public function arg_sort($array) {
+		ksort($array);
+		reset($array);
+		return $array;
+	}
+
+	public function charset_encode($input,$_output_charset ,$_input_charset ="GBK" ) {
+		
+		$output = "";
+		if($_input_charset == $_output_charset || $input ==null) {
+			$output = $input;
+		} elseif (function_exists("mb_convert_encoding")){
+			$output = mb_convert_encoding($input,$_output_charset,$_input_charset);
+		} elseif(function_exists("iconv")) {
+			$output = iconv($_input_charset,$_output_charset,$input);
+		} else die("sorry, you have no libs support for charset change.");
+		
+		return $output;
+	}	
 }
