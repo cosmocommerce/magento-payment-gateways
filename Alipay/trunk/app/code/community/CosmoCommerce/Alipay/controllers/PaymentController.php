@@ -185,7 +185,7 @@ class CosmoCommerce_Alipay_PaymentController extends Mage_Core_Controller_Front_
 				}
 
 			}
-			else if($postData['trade_status'] == 'TRADE_FINISHED') {   
+			else if($postData['trade_status'] == 'TRADE_FINISHED' || $postData['trade_status'] == "TRADE_SUCCESS") {   
 				$order = Mage::getModel('sales/order');
 				$order->loadByIncrementId($postData['out_trade_no']);
 				//$order->setAlipayTradeno($postData['trade_no']);
